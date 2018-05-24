@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import { bool, func } from 'prop-types';
+
 import TimeDisplay from 'components/TimeDisplay';
 import ControlButton from 'components/ControlButton';
 import ProgressBar from 'components/ProgressBar';
@@ -7,6 +9,7 @@ import ProgressBar from 'components/ProgressBar';
 const playIcon = require('assets/play.svg');
 const pauseIcon = require('assets/pause.svg');
 const stopIcon = require('assets/stop.svg');
+const alarmSound = require('assets/ringing.mp3');
 
 const DEFAULT_TIME = 25 * 60;
 const HEIGHT = 300;
@@ -25,6 +28,12 @@ const ButtonContainer = styled.div`
 `;
 
 export default class Timer extends React.Component {
+  static propTypes = {
+    playAlarm: bool.isRequired,
+    promptFocus: func.isRequired,
+    promptRelax: func.isRequired
+  };
+
   state = {
     time: DEFAULT_TIME,
     isActive: false
@@ -39,9 +48,15 @@ export default class Timer extends React.Component {
       if (this.state.time > 0) {
         this.setState({ time: this.state.time - 1 });
       } else {
-        this.stopTimer();
+        this.activateAlarm();
       }
     }, 1000);
+  }
+
+  activateAlarm() {
+    if (this.props.playAlarm) this.alarm.play();
+    this.stopTimer();
+    this.props.promptRelax();
   }
 
   stopTimer() {
@@ -60,11 +75,12 @@ export default class Timer extends React.Component {
       time: DEFAULT_TIME,
       isActive: false
     });
+    this.props.promptFocus();
   };
 
   render() {
     return (
-      <TimerContainer>
+      <TimerContainer onClick={this.soundAlarm}>
         <TimeDisplay time={this.state.time} />
         <ButtonContainer>
           <ControlButton
@@ -74,6 +90,9 @@ export default class Timer extends React.Component {
           <ControlButton icon={stopIcon} onClick={this.resetTimer} />
         </ButtonContainer>
         <ProgressBar progress={(DEFAULT_TIME - this.state.time) / DEFAULT_TIME} height={HEIGHT} />
+        <audio ref={(node) => { this.alarm = node; }}>
+          <source src={alarmSound} />
+        </audio>
       </TimerContainer>
     );
   }

@@ -27,6 +27,9 @@
     ],
     "comma-dangle": [
       "error", "never"
+    ],
+    "jsx-a11y/media-has-caption": [
+      0
     ]
   },
   "settings": {
